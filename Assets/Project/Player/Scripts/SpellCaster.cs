@@ -5,7 +5,9 @@ using System.Linq;
 public class SpellCaster : MonoBehaviour
 {
     public Transform castPoint;
-    public GameObject spellPrefab;
+    [Header("Spells")]
+    public GameObject fireballPrefab;
+    public GameObject healSpellPrefab;
     public float castForce = 25f;
     public float cooldown = 0.5f;
     public InputActionAsset inputActions;
@@ -13,6 +15,7 @@ public class SpellCaster : MonoBehaviour
     float lastCastTime;
     Camera cam;
     private InputAction attackAction;
+    private InputAction healAction;
 
     void Awake()
     {
@@ -41,6 +44,13 @@ public class SpellCaster : MonoBehaviour
             return;
         }
 
+        // Heal action (optional)
+        healAction = playerMap.FindAction("Heal");
+        if (healAction == null)
+        {
+            Debug.LogWarning("Could not find 'Heal' action in Player action map. Healing spell will be disabled until you add it.");
+        }
+
         Debug.Log("Attack action found successfully!");
     }
 
@@ -56,6 +66,13 @@ public class SpellCaster : MonoBehaviour
         {
             Debug.LogError("Attack action is NULL! Make sure Input Actions is assigned in Inspector.");
         }
+
+        if (healAction != null)
+        {
+            healAction.Enable();
+            healAction.performed += OnHeal;
+            Debug.Log("Heal action enabled!");
+        }
     }
 
     void OnDisable()
@@ -65,6 +82,12 @@ public class SpellCaster : MonoBehaviour
             attackAction.performed -= OnAttack;
             attackAction.Disable();
         }
+
+        if (healAction != null)
+        {
+            healAction.performed -= OnHeal;
+            healAction.Disable();
+        }
     }
 
     void OnAttack(InputAction.CallbackContext context)
@@ -72,21 +95,30 @@ public class SpellCaster : MonoBehaviour
         Debug.Log("Attack input received! Phase: " + context.phase);
         if (context.performed)
         {
-            Debug.Log("Attack performed - calling Cast()");
-            Cast();
+            Debug.Log("Attack performed - casting Fireball");
+            CastFireball();
         }
     }
 
-    void Cast()
+    void OnHeal(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            Debug.Log("Heal performed - casting HealSpell");
+            CastHeal();
+        }
+    }
+
+    void CastFireball()
     {
         // Check cooldown
         if (Time.time < lastCastTime + cooldown)
             return;
 
         // Check if prefab is assigned
-        if (spellPrefab == null)
+        if (fireballPrefab == null)
         {
-            Debug.LogError("Spell Prefab is not assigned in SpellCaster!");
+            Debug.LogError("Fireball Prefab is not assigned in SpellCaster!");
             return;
         }
 
@@ -99,7 +131,7 @@ public class SpellCaster : MonoBehaviour
 
         // Instantiate spell
         GameObject spell = Instantiate(
-            spellPrefab,
+            fireballPrefab,
             castPoint.position,
             Quaternion.LookRotation(cam.transform.forward)
         );
@@ -127,5 +159,24 @@ public class SpellCaster : MonoBehaviour
 
         lastCastTime = Time.time;
         Debug.Log("Fireball cast! Position: " + castPoint.position);
+    }
+
+    void CastHeal()
+    {
+        // No cooldown for heal yet (or you can reuse the same cooldown check here)
+
+        if (healSpellPrefab == null)
+        {
+            Debug.LogError("Heal Spell Prefab is not assigned in SpellCaster!");
+            return;
+        }
+
+        Instantiate(
+            healSpellPrefab,
+            transform.position,
+            Quaternion.identity
+        );
+
+        Debug.Log("Heal spell cast!");
     }
 }
