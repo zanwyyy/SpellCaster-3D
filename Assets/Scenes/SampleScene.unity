@@ -644,7 +644,7 @@ MonoBehaviour:
   spellPrefab: {fileID: 7330349840274122965, guid: 8ec3d8d5bc3844b64ac05edd6866eddf, type: 3}
   castForce: 25
   cooldown: 0.5
-  inputActions: {fileID: 0}
+  inputActions: {fileID: -944628639613478452, guid: f57e6582f219f4dd3b05ca240339ae39, type: 3}
 --- !u!1 &2092839672
 GameObject:
   m_ObjectHideFlags: 0
