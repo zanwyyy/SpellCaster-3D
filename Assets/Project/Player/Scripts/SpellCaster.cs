@@ -113,15 +113,17 @@ public class SpellCaster : MonoBehaviour
             renderer.material = mat;
         }
 
-        // Get Rigidbody and add force
+        // Get Rigidbody and make the fireball fly straight along the camera forward
         Rigidbody rb = spell.GetComponent<Rigidbody>();
         if (rb == null)
         {
             Debug.LogError("Fireball prefab is missing Rigidbody component! Adding one now...");
             rb = spell.AddComponent<Rigidbody>();
         }
-        
-        rb.AddForce(cam.transform.forward * castForce, ForceMode.Impulse);
+
+        // Disable gravity so the fireball doesn't drop and make it move straight forward
+        rb.useGravity = false;
+        rb.linearVelocity = cam.transform.forward * castForce;
 
         lastCastTime = Time.time;
         Debug.Log("Fireball cast! Position: " + castPoint.position);
